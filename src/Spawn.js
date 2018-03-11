@@ -119,6 +119,12 @@ class Spawn {
     return this._expected_exit_code = int
   }
 
+  /*
+   *  @summary Handle run callback processing
+   */
+  handleRunCallback(){
+    if ( this.run_cb ) this.run_cb(this, this._run_resolve, this._run_reject)
+  }
 
   /*
    *  @summary Handle `spawn` stdout processing
@@ -127,7 +133,6 @@ class Spawn {
     this.output.push([ 1, data.toString() ])
     if ( this.stdout_cb ) this.stdout_cb(data)
   }
-
 
   /*
    *  @summary Handle `spawn` stderr processing
@@ -171,7 +176,7 @@ class Spawn {
       }
 
       // Run callback 
-      if ( this.run_cb ) this.run_cb(this, resolve, reject)
+      this.handleRunCallback()
 
       // Handle output
       proc.stdout.on('data', this.handleStdout.bind(this))
