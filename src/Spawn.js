@@ -17,9 +17,11 @@ class SpawnException extends Exception {
 /* Spawn */
 class Spawn {
   
-  static get ms_minute(){ return 60000 } // 60 * 1000
-  static get ms_hour(){ return 3600000 } // 60 * 60 * 1000
-  static get ms_day(){ return 86400000 } // 24 * 60 * 60 * 1000
+  static _classInit(){
+    this.ms_minute = 60000  // 60 * 1000
+    this.ms_hour = 3600000  // 60 * 60 * 1000
+    this.ms_day = 86400000  // 24 * 60 * 60 * 1000
+  }
 
   static run( command, opts = {}){
     opts.command = command
@@ -31,7 +33,10 @@ class Spawn {
     this._errors = []
     this._output = []
     this._running = false
-    
+    this._started = false
+    this._finished = false
+
+    this._expected_exit_code = options.expected_exit_code || 0
     this._timeout_in = options.timeout_in
     this._timeout_at = options.timeout_at
     this._error_cb = options.error_cb
@@ -75,23 +80,31 @@ class Spawn {
   }
 
   get stderr_cb(){ return this._stderr_cb }
-  setStderr_cb( cb ){
+  setStderrCb( cb ){
     return this._stderr_cb = cb
   }
   
   get close_cb(){ return this._close_cb }
-  setClose_cb( cb ){
+  setCloseCb( cb ){
     return this._close_cb = cb
   }
   
   get error_cb(){ return this._error_cb }
-  setError_cb( cb ){
+  setErrorCb( cb ){
     return this._error_cb = cb
   }
 
   get ignore_exit_code(){ return this._ignore_exit_code }
   ignoreExitCode( bool = true ){
     return this._ignore_exit_code = Boolean(bool)
+  }
+
+  get expected_exit_code(){ return this._expected_exit_code }
+  setExpectedExitCode( int ){
+    if ( ! `${int}`.match(/^\d+$/) ) {
+      throw new SpawnException(`Expected exit code should be an integer. Got ${int}`)
+    }
+    return this._expected_exit_code = int
   }
 
 
@@ -118,10 +131,12 @@ class Spawn {
    */
   run(){
     return new Promise((resolve, reject)=>{
+      if ( this._started ) throw new SpawnException('Command already running', this)
       let proc = this.proc = cp.spawn(this.spawn_cmd, this.spawn_args)
 
       // Setup
       this._running = true
+      this._started = true
       let output = this._output
       
       // Timeouts
@@ -148,6 +163,7 @@ class Spawn {
       // Handle process close
       proc.on('close', (exit_code, signal) => {
         this._running = false
+        this._finished = true
 
         // `process.kill` somehow caused a `null` exit code
         if ( exit_code === null && proc.killed ) {
@@ -161,7 +177,7 @@ class Spawn {
         // Cancel timeouts
         if ( this._kill_timer ) clearTimeout(this._kill_timer)
         
-        if ( exit_code === 0 ) {
+        if ( exit_code === this._expected_exit_code || this._ignore_exit_code ) {
           resolve(this)
         } else {
           let err = this.errors[0]
@@ -200,11 +216,14 @@ class Spawn {
     o.errors = this._errors
     o.output = this._output
     o.running = this._running
+    o.started = this._started
+    o.finished = this._finished
     o.timeout_at = this._timeout_at
     o.timeout_in = this._timeout_in
     return o
   }
 
 }
+Spawn._classInit()
 
 module.exports = { Spawn, SpawnException }

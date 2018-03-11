@@ -31,6 +31,8 @@ describe('unit::mhio::spawn::Spawn', function(){
         errors: [],
         output: [],
         running: false,
+        started: false,
+        finished: false,
         timeout_at: undefined,
         timeout_in: undefined,
       })

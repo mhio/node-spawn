@@ -3,6 +3,7 @@
 global.chai = require('chai')
 global.expect = chai.expect
 //chai.use(require('chai-fs'))
+chai.use(require('sinon-chai'))
 chai.use(require('chai-subset'))
 chai.use(require('chai-as-promised'))
 
