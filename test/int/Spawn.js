@@ -58,6 +58,31 @@ describe('int::mhio::spawn::Spawn', function(){
       return proc.run().should.become(proc)
     })
 
+    it('should kill a running command', function(){
+      proc.setCommand([ 'sleep', '2' ])
+      setTimeout(()=> proc.kill(), 5)
+      return proc.run().then(()=> {
+        expect.fail('process shouldn\'t finish on kill')
+      }).catch(err => {
+        expect( err.message ).to.match(/Command exited with: "143"/)
+        expect( proc.output ).to.eql([ [3,143] ])
+        expect( proc.exit_code ).to.equal(143)
+      })
+    })
+
+    it('should succesfully return from kill for a finished command', function(){
+      proc.setCommand([ 'sleep', '0.1' ])
+      return proc.run().then(()=> {
+        expect( proc.kill() ).to.be.undefined
+      })
+    })
+
+    it('should succesfully return from kill for a fresh command', function(){
+      proc.setCommand([ 'sleep', '2' ])
+      expect( proc.kill() ).to.be.undefined
+    })
+
+
     describe('callbacks', function(){
 
       it('should run a callback on run with promise resolve/reject', function(){

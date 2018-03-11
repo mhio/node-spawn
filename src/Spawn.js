@@ -149,6 +149,8 @@ class Spawn {
       // Setup
       this._running = true
       this._started = true
+      this._run_resolve = resolve
+      this._run_reject = reject
       let output = this._output
       
       // Timeouts
@@ -219,6 +221,14 @@ class Spawn {
         if ( this.error_cb ) this.error_cb(error)
       })      
     })
+  }
+
+  /*
+   *  @summary Kill the running process
+   *  @description Send a kill signal to the spawned process if it exists.
+   */
+  kill( signal = 'SIGTERM' ){
+    if ( this.running ) return this.proc.kill(signal)
   }
 
   /*
