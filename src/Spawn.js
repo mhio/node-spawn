@@ -17,10 +17,25 @@ class SpawnException extends Exception {
   }
 }
 
-/** Spawn a command */
+/** 
+ * Spawn a command 
+ * @property {Number} timeout_in    - Milliseconds to timeout from run time
+ * @property {Number} timeout_at    - Milliseconds timestamp to timeout at
+ * @property {function} run_cb      - Callback to run on spawn process run
+ * @property {function} stdout_cb   - Callback to run on stdout data
+ * @property {function} stderr_cb   - Callback to run on stderr data
+ * @property {function} close_cb    - Callback to run on spawn process close
+ * @property {function} error_cb    - Callback to run on spawn process error
+ */
 class Spawn {
   
-  /** Class static initialisation */
+  /** 
+   * Class static initialisation
+   * @namespace Spawn
+   * @property {Number} ms_minute   - A minute of time in milliseconds
+   * @property {Number} ms_hour     - An hour of time in milliseconds
+   * @property {Number} ms_day      - A day of time in milliseconds
+   */
   static _classInit(){
     this.exception_type = SpawnException
     this.ms_minute = 60000  // 60 * 1000
@@ -28,7 +43,11 @@ class Spawn {
     this.ms_day = 86400000  // 24 * 60 * 60 * 1000
   }
 
-  /** Create a Spawn and run it */
+  /**
+   * Create a Spawn and run it
+   * @param {array} command - Array of argv to run
+   * @param {Object} opts - Spawn options, see {@link Spawn#constructor}
+   */
   static run( command, opts = {}){
     opts.command = command
     let proc = new this(opts)
@@ -37,7 +56,17 @@ class Spawn {
 
   /**
    * Represents a process to be spawned.
-   * @constructor
+   * @param {Object} opts
+   * @param {Number} opts.command               - Command and arguments array
+   * @param {Number} opts.timeout_in            - Milliseconds to time out the process in
+   * @param {Number} opts.timeout_at            - Millisecond timestamp to time out the process at
+   * @param {function} opts.run_cb              - Callback to run on spawn process run
+   * @param {function} opts.stdout_cb           - Callback to run on stdout data
+   * @param {function} opts.stderr_cb           - Callback to run on stderr data
+   * @param {function} opts.close_cb            - Callback to run on spawn process close
+   * @param {function} opts.error_cb            - Callback to run on spawn process error
+   * @param {Boolean} opts.ignore_exit_code     - Ignore exit code checks
+   * @param {Number} opts.expected_exit_code    - Expect an exit code other than 0
    */
   constructor( options = {} ){
     this.exception_type = this.constructor.exception_type
@@ -155,8 +184,8 @@ class Spawn {
   }
 
   /**
-   *  @summary Run a process with spawn, turn it into a promise
-   *  @returns {promise}
+   *  @summary Run a process with `child_process.spawn`, turn it into a promise
+   *  @returns {Promise}
    */
   run(){
     return new Promise((resolve, reject)=>{
@@ -251,7 +280,7 @@ class Spawn {
 
   /**
    *  @summary Convert object to JSON object for `JSON.stringify()`
-   *  @returns {object}
+   *  @returns {Object}
    */
   toJSON(){
     let o = {}
