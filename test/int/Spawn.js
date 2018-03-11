@@ -60,6 +60,24 @@ describe('int::mhio::spawn::Spawn', function(){
 
     describe('callbacks', function(){
 
+      it('should run a callback on run with promise resolve/reject', function(){
+        let spy = sinon.spy()
+        proc.setCommand([ 'true' ])
+        proc.setRunCb(spy)
+        return proc.run().then(()=>{
+
+          spy.should.have.been.calledWith(proc)
+          expect( spy.args[0][0], 'arg0 proc' ).to.be.a('object')
+          expect( spy.args[0][1], 'arg1 resolve' ).to.be.a('function')
+          expect( spy.args[0][2], 'arg2 reject' ).to.be.a('function')
+        })
+      })
+
+      it('should fail to set a bad run callback', function(){
+        let fn = ()=> proc.setRunCb('a')
+        expect( fn ).to.throw(/must be a function/)
+      })
+
       it('should run a callback on close', function(){
         let spy = sinon.spy()
         proc.setCommand([ 'true' ])

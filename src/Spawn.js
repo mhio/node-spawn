@@ -76,6 +76,12 @@ class Spawn {
     return this._timeout_at = ts_val
   }
 
+  get run_cb(){ return this._run_cb }
+  setRunCb( cb ){
+    if ( typeof cb !== 'function' ) throw new SpawnException('Callback must be a function')
+    return this._run_cb = cb
+  }
+
   get stdout_cb(){ return this._stdout_cb }
   setStdoutCb( cb ){
     if ( typeof cb !== 'function' ) throw new SpawnException('Callback must be a function')
@@ -162,6 +168,9 @@ class Spawn {
         }, ms_till_timeout)
       }
 
+      // Run callback 
+      if ( this.run_cb ) this.run_cb(this, resolve, reject)
+
       // Handle output
       proc.stdout.on('data', this.handleStdout.bind(this))
       proc.stderr.on('data', this.handleStderr.bind(this))
@@ -182,7 +191,7 @@ class Spawn {
 
         // Cancel timeouts
         if ( this._kill_timer ) clearTimeout(this._kill_timer)
-        
+
         if ( exit_code === this.expected_exit_code || this.ignore_exit_code ) {
           resolve(this)
         } else {
