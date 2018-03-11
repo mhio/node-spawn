@@ -53,7 +53,7 @@ class Spawn {
 
   get command(){ return this._command }
   setCommand( command_arr ){
-    if ( command_arr instanceof Array === false ) throw new Error('command not an Array')
+    if ( command_arr instanceof Array === false ) throw new SpawnException('command not an Array')
     return this._command = command_arr
   }
 
@@ -63,6 +63,8 @@ class Spawn {
   get output(){     return this._output }
   get errors(){     return this._errors }
   get running(){    return this._running }
+  get started(){    return this._started }
+  get finished(){    return this._finished }
 
   get timeout_in(){ return this._timeout_in }
   setTimeoutIn( ms_val ){
@@ -75,22 +77,26 @@ class Spawn {
   }
 
   get stdout_cb(){ return this._stdout_cb }
-  setStdoutCb( cb ){  
+  setStdoutCb( cb ){
+    if ( typeof cb !== 'function' ) throw new SpawnException('Callback must be a function')
     return this._stdout_cb = cb
   }
 
   get stderr_cb(){ return this._stderr_cb }
   setStderrCb( cb ){
+    if ( typeof cb !== 'function' ) throw new SpawnException('Callback must be a function')
     return this._stderr_cb = cb
   }
   
   get close_cb(){ return this._close_cb }
   setCloseCb( cb ){
+    if ( typeof cb !== 'function' ) throw new SpawnException('Callback must be a function')
     return this._close_cb = cb
   }
   
   get error_cb(){ return this._error_cb }
   setErrorCb( cb ){
+    if ( typeof cb !== 'function' ) throw new SpawnException('Callback must be a function')
     return this._error_cb = cb
   }
 
@@ -113,7 +119,7 @@ class Spawn {
    */
   handleStdout(data){
     this.output.push([ 1, data.toString() ])
-    if ( this._stdout_cb ) this._stdout_cb(data)
+    if ( this.stdout_cb ) this.stdout_cb(data)
   }
 
 
@@ -122,7 +128,7 @@ class Spawn {
    */
   handleStderr(data){
     this.output.push([ 2, data.toString() ])
-    if ( this._stderr_cb ) this._stderr_cb(data)
+    if ( this.stderr_cb ) this.stderr_cb(data)
   }
 
   /*
@@ -144,7 +150,7 @@ class Spawn {
 
       if ( this._timeout_at ) {
         let ms_till_timeout = this._timeout_at - Date.now()
-        if ( ms_till_timeout < 0 ) {
+        if ( ms_till_timeout <= 0 ) {
           return reject(new Error('Timeout time in the past: ' + this._timeout_at))
         }
         this._kill_timer = setTimeout(()=>{
@@ -177,14 +183,14 @@ class Spawn {
         // Cancel timeouts
         if ( this._kill_timer ) clearTimeout(this._kill_timer)
         
-        if ( exit_code === this._expected_exit_code || this._ignore_exit_code ) {
+        if ( exit_code === this.expected_exit_code || this.ignore_exit_code ) {
           resolve(this)
         } else {
           let err = this.errors[0]
           if (!err) err = new SpawnException(`Command exited with: "${exit_code}"`)
           reject(err)
         }
-        if ( this._close_cb ) this._close_cb(exit_code)
+        if ( this.close_cb ) this.close_cb(exit_code)
       })
       
       // Handle error events into `SpawnException`s
@@ -201,7 +207,7 @@ class Spawn {
         debug('job err', error)
         output.push([ 4, error ])
         this._errors.push(error)
-        if ( this._error_cb ) this._error_cb(error)
+        if ( this.error_cb ) this.error_cb(error)
       })      
     })
   }
@@ -212,14 +218,14 @@ class Spawn {
    */
   toJSON(){
     let o = {}
-    o.command = this._command
-    o.errors = this._errors
-    o.output = this._output
-    o.running = this._running
-    o.started = this._started
-    o.finished = this._finished
-    o.timeout_at = this._timeout_at
-    o.timeout_in = this._timeout_in
+    o.command = this.command
+    o.errors = this.errors
+    o.output = this.output
+    o.running = this.running
+    o.started = this.started
+    o.finished = this.finished
+    o.timeout_at = this.timeout_at
+    o.timeout_in = this.timeout_in
     return o
   }
 
