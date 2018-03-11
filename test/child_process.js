@@ -1,3 +1,4 @@
+/* eslint-disable */
 const cp = require('child_process')
 
 let proc = cp.spawn('sleep', ['5'])
