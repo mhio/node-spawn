@@ -7,6 +7,18 @@ const { Spawn } = require('../../src/Spawn')
 
 describe('int::mhio::spawn::Spawn', function(){
 
+  describe('static', function(){
+
+    it('should run a simple command', function(){
+      return Spawn.run(['true'])
+    })
+
+    it('should run a command with options', function(done){
+      Spawn.run(['true'], { close_cb: ()=> done(), error_cb: done })
+    })
+
+  })
+
   describe('instance', function(){
     
     let proc = null

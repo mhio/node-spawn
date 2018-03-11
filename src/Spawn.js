@@ -2,7 +2,10 @@ const cp = require('child_process')
 const debug = require('debug')('mhio:spawn:Spawn')
 const { Exception } = require('@mhio/exception')
 
-/* SpawnException for wrapping any Error objects raised here */
+/** 
+ * SpawnException for wrapping any Error objects raised in Spawn  
+ * @extends Exception
+ */
 class SpawnException extends Exception {
   constructor( message, opts = {} ){
     super(message, opts)
@@ -14,22 +17,31 @@ class SpawnException extends Exception {
   }
 }
 
-/* Spawn */
+/** Spawn a command */
 class Spawn {
   
+  /** Class static initialisation */
   static _classInit(){
+    this.exception_type = SpawnException
     this.ms_minute = 60000  // 60 * 1000
     this.ms_hour = 3600000  // 60 * 60 * 1000
     this.ms_day = 86400000  // 24 * 60 * 60 * 1000
   }
 
+  /** Create a Spawn and run it */
   static run( command, opts = {}){
     opts.command = command
     let proc = new this(opts)
     return proc.run()
   }
 
+  /**
+   * Represents a process to be spawned.
+   * @constructor
+   */
   constructor( options = {} ){
+    this.exception_type = this.constructor.exception_type
+
     this._errors = []
     this._output = []
     this._running = false
@@ -37,12 +49,12 @@ class Spawn {
     this._finished = false
 
     this._expected_exit_code = options.expected_exit_code || 0
-    this._timeout_in = options.timeout_in
-    this._timeout_at = options.timeout_at
-    this._error_cb = options.error_cb
-    this._exit_cb = options.exit_cb
-    this._stdout_cb = options.stdout_cb
-    this._stderr_cb = options.stderr_cb
+    this._timeout_in  = options.timeout_in
+    this._timeout_at  = options.timeout_at
+    this._error_cb    = options.error_cb
+    this._close_cb    = options.close_cb
+    this._stdout_cb   = options.stdout_cb
+    this._stderr_cb   = options.stderr_cb
     
     this._ignore_exit_code = (options.ignore_exit_code !== undefined)
       ? Boolean(options.ignore_exit_code)
@@ -53,7 +65,7 @@ class Spawn {
 
   get command(){ return this._command }
   setCommand( command_arr ){
-    if ( command_arr instanceof Array === false ) throw new SpawnException('command not an Array')
+    if ( command_arr instanceof Array === false ) throw new this.exception_type('command not an Array')
     return this._command = command_arr
   }
 
@@ -78,31 +90,31 @@ class Spawn {
 
   get run_cb(){ return this._run_cb }
   setRunCb( cb ){
-    if ( typeof cb !== 'function' ) throw new SpawnException('Callback must be a function')
+    if ( typeof cb !== 'function' ) throw new this.exception_type('Callback must be a function')
     return this._run_cb = cb
   }
 
   get stdout_cb(){ return this._stdout_cb }
   setStdoutCb( cb ){
-    if ( typeof cb !== 'function' ) throw new SpawnException('Callback must be a function')
+    if ( typeof cb !== 'function' ) throw new this.exception_type('Callback must be a function')
     return this._stdout_cb = cb
   }
 
   get stderr_cb(){ return this._stderr_cb }
   setStderrCb( cb ){
-    if ( typeof cb !== 'function' ) throw new SpawnException('Callback must be a function')
+    if ( typeof cb !== 'function' ) throw new this.exception_type('Callback must be a function')
     return this._stderr_cb = cb
   }
   
   get close_cb(){ return this._close_cb }
   setCloseCb( cb ){
-    if ( typeof cb !== 'function' ) throw new SpawnException('Callback must be a function')
+    if ( typeof cb !== 'function' ) throw new this.exception_type('Callback must be a function')
     return this._close_cb = cb
   }
   
   get error_cb(){ return this._error_cb }
   setErrorCb( cb ){
-    if ( typeof cb !== 'function' ) throw new SpawnException('Callback must be a function')
+    if ( typeof cb !== 'function' ) throw new this.exception_type('Callback must be a function')
     return this._error_cb = cb
   }
 
@@ -114,19 +126,19 @@ class Spawn {
   get expected_exit_code(){ return this._expected_exit_code }
   setExpectedExitCode( int ){
     if ( ! `${int}`.match(/^\d+$/) ) {
-      throw new SpawnException(`Expected exit code should be an integer. Got ${int}`)
+      throw new this.exception_type(`Expected exit code should be an integer. Got ${int}`)
     }
     return this._expected_exit_code = int
   }
 
-  /*
+  /**
    *  @summary Handle run callback processing
    */
   handleRunCallback(){
     if ( this.run_cb ) this.run_cb(this, this._run_resolve, this._run_reject)
   }
 
-  /*
+  /**
    *  @summary Handle `spawn` stdout processing
    */
   handleStdout(data){
@@ -134,7 +146,7 @@ class Spawn {
     if ( this.stdout_cb ) this.stdout_cb(data)
   }
 
-  /*
+  /**
    *  @summary Handle `spawn` stderr processing
    */
   handleStderr(data){
@@ -142,14 +154,15 @@ class Spawn {
     if ( this.stderr_cb ) this.stderr_cb(data)
   }
 
-  /*
+  /**
    *  @summary Run a process with spawn, turn it into a promise
    *  @returns {promise}
    */
   run(){
     return new Promise((resolve, reject)=>{
-      if ( this._started ) throw new SpawnException('Command already running', this)
+      if ( this._started ) throw new this.exception_type('Command already running', this)
       let proc = this.proc = cp.spawn(this.spawn_cmd, this.spawn_args)
+      debug('run spawning', this.spawn_cmd, this.spawn_args)
 
       // Setup
       this._running = true
@@ -203,32 +216,32 @@ class Spawn {
           resolve(this)
         } else {
           let err = this.errors[0]
-          if (!err) err = new SpawnException(`Command exited with: "${exit_code}"`)
+          if (!err) err = new this.exception_type(`Command exited with: "${exit_code}"`)
           reject(err)
         }
-        if ( this.close_cb ) this.close_cb(exit_code)
+        if ( this.close_cb ) this.close_cb(exit_code, signal, this)
       })
       
-      // Handle error events into `SpawnException`s
+      // Handle error events into `this.exception_type`s
       proc.on('error', err => {
         let error = null
         if ( err.code === 'ENOENT' && /^spawn /.exec(err.syscall) ){
-          error = new SpawnException(`Command not found: "${this.spawn_cmd}"`) // ${this.pwd}`)
+          error = new this.exception_type(`Command not found: "${this.spawn_cmd}"`) // ${this.pwd}`)
         }
         else {
-          error = new SpawnException(`Command failed: "${this.spawn_cmd}" "${this.spawn_args.join('" "')}"`)
+          error = new this.exception_type(`Command failed: "${this.spawn_cmd}" "${this.spawn_args.join('" "')}"`)
         }
 
         error.error = err
         debug('job err', error)
         output.push([ 4, error ])
         this._errors.push(error)
-        if ( this.error_cb ) this.error_cb(error)
+        if ( this.error_cb ) this.error_cb(error, this)
       })      
     })
   }
 
-  /*
+  /**
    *  @summary Kill the running process
    *  @description Send a kill signal to the spawned process if it exists.
    */
@@ -236,7 +249,7 @@ class Spawn {
     if ( this.running ) return this.proc.kill(signal)
   }
 
-  /*
+  /**
    *  @summary Convert object to JSON object for `JSON.stringify()`
    *  @returns {object}
    */
