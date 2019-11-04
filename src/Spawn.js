@@ -300,10 +300,13 @@ class Spawn {
    * @returns {Array}
    */
   get stdout(){
-    return this._output.reduce((filtered, line) => {
+    if (this._stdout) return this._stdout
+    const stdout = this._output.reduce((filtered, line) => {
       if (line[0] === 1) filtered.push(line[1].replace(/\r?\n$/, ''))
       return filtered
     }, [])
+    if (this.finished && stdout.length < 5000) this._stdout = stdout
+    return stdout
   }
 
   /**
@@ -311,10 +314,13 @@ class Spawn {
    * @returns {Array}
    */
   get stderr(){
-    return this._output.reduce((filtered, line) => {
+    if (this._stderr) return this._stderr
+    const stderr = this._output.reduce((filtered, line) => {
       if (line[0] === 2) filtered.push(line[1].replace(/\r?\n$/, ''))
       return filtered
     }, [])
+    if (this.finished && stderr.length < 5000) this._stderr = stderr
+    return stderr
   }
 
 }

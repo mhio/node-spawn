@@ -103,11 +103,23 @@ describe('int::mhio::spawn::Spawn', function(){
       })
     })
 
+    it('should return only stderr from output', function(){
+      proc.setCommand([ 'sh', '-c', 'echo test >/dev/stderr' ])
+      return proc.run().then(()=> {
+        proc.stderr.should.eql(['test'])
+        proc.stdout.should.eql([])
+        proc._stderr.should.eql(['test'])
+        proc.stderr.should.eql(['test'])
+      })
+    })
+
     it('should return only stdout from output', function(){
       proc.setCommand([ 'sh', '-c', 'echo test' ])
       return proc.run().then(()=> {
         proc.stdout.should.eql(['test'])
         proc.stderr.should.eql([])
+        proc._stdout.should.eql(['test'])
+        proc.stdout.should.eql(['test'])
       })
     })
 
