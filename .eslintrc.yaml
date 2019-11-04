@@ -1,5 +1,5 @@
 parserOptions:
-  ecmaVersion: 2016
+  ecmaVersion: 8
 env:
   node: true
   mocha: true
