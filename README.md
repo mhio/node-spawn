@@ -15,7 +15,7 @@ npm install @mhio/spawn
 [API Docs](doc/API.md)
 
 ```
-import { Job } from '@mhio/spawn'
+import { Spawn } from '@mhio/spawn'
 
 let proc = Spawn.run([ 'printf', '%s\n%s\n', 'one', 'two' ], {})
 ```
