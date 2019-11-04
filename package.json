@@ -9,8 +9,7 @@
   "private": false,
   "dependencies": {
     "@mhio/exception": "~0.2.1",
-    "debug": "^4.1.1",
-    "sinon-chai": "^3.3.0"
+    "debug": "^4.1.1"
   },
   "scripts": {
     "build": "yarn run build:doc",
@@ -37,6 +36,7 @@
     "jsdoc-to-markdown": "^5.0.2",
     "mocha": "^6.2.2",
     "nyc": "^14.1.1",
-    "sinon": "^7.5.0"
+    "sinon": "^7.5.0",
+    "sinon-chai": "^3.3.0"
   }
 }
