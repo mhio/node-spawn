@@ -1,6 +1,6 @@
 {
   "name": "@mhio/spawn",
-  "version": "0.4.1",
+  "version": "0.5.0-0",
   "description": "Spawn a process",
   "main": "src/index.js",
   "author": "Matt Hoyle",
