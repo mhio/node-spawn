@@ -11,9 +11,15 @@ class SpawnException extends Exception {
     super(message, opts)
     this.command = opts.command
     this.error = opts.error
-    this.arguments = opts.arguments
+    this.arguments = opts.arguments 
     this.cwd = process.cwd()
     this.path = process.env.PATH
+    this.results = opts.results
+    if (opts.results) {
+      if (!this.command) this.command = opts.results.command
+      if (!this.error) this.error = opts.results.error
+      if (!this.arguments) this.arguments = opts.results.arguments
+    }
   }
 }
 
@@ -155,7 +161,7 @@ class Spawn {
   get expected_exit_code(){ return this._expected_exit_code }
   setExpectedExitCode( int ){
     if ( ! `${int}`.match(/^\d+$/) ) {
-      throw new this.exception_type(`Expected exit code should be an integer. Got ${int}`)
+      throw new this.exception_type(`Expected exit code should be an integer. Got ${int}`, { results: this })
     }
     return this._expected_exit_code = int
   }
@@ -245,7 +251,7 @@ class Spawn {
           resolve(this)
         } else {
           let err = this.errors[0]
-          if (!err) err = new this.exception_type(`Command exited with: "${exit_code}"`)
+          if (!err) err = new this.exception_type(`Command exited with: "${exit_code}"`, { results: this })
           reject(err)
         }
         if ( this.close_cb ) this.close_cb(exit_code, signal, this)
@@ -258,7 +264,7 @@ class Spawn {
           error = new this.exception_type(`Command not found: "${this.spawn_cmd}"`) // ${this.pwd}`)
         }
         else {
-          error = new this.exception_type(`Command failed: "${this.spawn_cmd}" "${this.spawn_args.join('" "')}"`)
+          error = new this.exception_type(`Command failed: "${this.spawn_cmd}" "${this.spawn_args.join('" "')}"`, { results: this })
         }
 
         error.error = err
