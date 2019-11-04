@@ -43,6 +43,19 @@ describe('int::mhio::spawn::Spawn', function(){
       return proc.run().should.be.rejectedWith(/Command exited with: "1"/)
     })
 
+    it('should attach the Spawn instance to error when fails to run a bad binary', async function(){
+      proc.setCommand([ 'false' ])
+      try {
+        await proc.run()
+        expect.fail()
+      }
+      catch (err) {
+        expect(err).to.be.ok
+        expect(err.results).to.be.ok
+        expect(err.results.exit_code).to.eql(1)
+      }
+    })
+
     it('should fail to run a Spawn twice', function(){
       proc.run()
       return proc.run().should.be.rejectedWith(/Command already running/)
@@ -79,6 +92,7 @@ describe('int::mhio::spawn::Spawn', function(){
         expect( err.message ).to.match(/Command exited with: "143"/)
         expect( proc.output ).to.eql([ [3,143] ])
         expect( proc.exit_code ).to.equal(143)
+        expect( err ).to.contain.key('results')
       })
     })
 

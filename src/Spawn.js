@@ -7,18 +7,22 @@ const { Exception } = require('@mhio/exception')
  * @extends Exception
  */
 class SpawnException extends Exception {
-  constructor( message, opts = {} ){
+  constructor( message, opts ){
     super(message, opts)
-    this.command = opts.command
-    this.error = opts.error
-    this.arguments = opts.arguments 
     this.cwd = process.cwd()
     this.path = process.env.PATH
-    this.results = opts.results
-    if (opts.results) {
-      if (!this.command) this.command = opts.results.command
-      if (!this.error) this.error = opts.results.error
-      if (!this.arguments) this.arguments = opts.results.arguments
+    if (opts) {
+      if (opts.command) this.command = opts.command
+      if (opts.error) this.error = opts.error
+      if (opts.arguments) this.arguments = opts.arguments 
+    }
+    if (opts && opts.results) {
+      this.results = opts.results
+      if (!this.command) this.command = this.results.command
+      if (!this.error) this.error = this.results.error
+      if (!this.arguments) this.arguments = this.results.arguments
+    } else {
+      this.results = false
     }
   }
 }
