@@ -46,6 +46,8 @@
 * [Spawn](#Spawn)
     * [new Spawn(opts)](#new_Spawn_new)
     * _instance_
+        * [.stdout](#Spawn+stdout) ⇒ <code>Array</code>
+        * [.stderr](#Spawn+stderr) ⇒ <code>Array</code>
         * [.handleRunCallback()](#Spawn+handleRunCallback)
         * [.handleStdout()](#Spawn+handleStdout)
         * [.handleStderr()](#Spawn+handleStderr)
@@ -78,6 +80,22 @@
 | opts.ignore_exit_code | <code>Boolean</code> | <p>Ignore exit code checks</p> |
 | opts.expected_exit_code | <code>Number</code> | <p>Expect an exit code other than 0</p> |
 
+
+* * *
+
+<a name="Spawn+stdout"></a>
+
+### spawn.stdout ⇒ <code>Array</code>
+**Kind**: instance property of [<code>Spawn</code>](#Spawn)  
+**Summary**: <p>return only stdout array</p>  
+
+* * *
+
+<a name="Spawn+stderr"></a>
+
+### spawn.stderr ⇒ <code>Array</code>
+**Kind**: instance property of [<code>Spawn</code>](#Spawn)  
+**Summary**: <p>return only stderr array</p>  
 
 * * *
 
@@ -164,6 +182,8 @@
 * [Spawn](#Spawn) : <code>object</code>
     * [new Spawn(opts)](#new_Spawn_new)
     * _instance_
+        * [.stdout](#Spawn+stdout) ⇒ <code>Array</code>
+        * [.stderr](#Spawn+stderr) ⇒ <code>Array</code>
         * [.handleRunCallback()](#Spawn+handleRunCallback)
         * [.handleStdout()](#Spawn+handleStdout)
         * [.handleStderr()](#Spawn+handleStderr)
@@ -196,6 +216,22 @@
 | opts.ignore_exit_code | <code>Boolean</code> | <p>Ignore exit code checks</p> |
 | opts.expected_exit_code | <code>Number</code> | <p>Expect an exit code other than 0</p> |
 
+
+* * *
+
+<a name="Spawn+stdout"></a>
+
+### spawn.stdout ⇒ <code>Array</code>
+**Kind**: instance property of [<code>Spawn</code>](#Spawn)  
+**Summary**: <p>return only stdout array</p>  
+
+* * *
+
+<a name="Spawn+stderr"></a>
+
+### spawn.stderr ⇒ <code>Array</code>
+**Kind**: instance property of [<code>Spawn</code>](#Spawn)  
+**Summary**: <p>return only stderr array</p>  
 
 * * *
 
