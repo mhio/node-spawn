@@ -95,6 +95,23 @@ describe('int::mhio::spawn::Spawn', function(){
     })
 
 
+    it('should return only stderr from output', function(){
+      proc.setCommand([ 'sh', '-c', 'echo test >/dev/stderr' ])
+      return proc.run().then(()=> {
+        proc.stderr.should.eql(['test'])
+        proc.stdout.should.eql([])
+      })
+    })
+
+    it('should return only stdout from output', function(){
+      proc.setCommand([ 'sh', '-c', 'echo test' ])
+      return proc.run().then(()=> {
+        proc.stdout.should.eql(['test'])
+        proc.stderr.should.eql([])
+      })
+    })
+
+
     describe('callbacks', function(){
 
       it('should run a callback on run with promise resolve/reject', function(){

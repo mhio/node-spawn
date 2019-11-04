@@ -295,6 +295,28 @@ class Spawn {
     return o
   }
 
+  /**
+   * @summary return only stdout array
+   * @returns {Array}
+   */
+  get stdout(){
+    return this._output.reduce((filtered, line) => {
+      if (line[0] === 1) filtered.push(line[1].replace(/\r?\n$/, ''))
+      return filtered
+    }, [])
+  }
+
+  /**
+   * @summary return only stderr array
+   * @returns {Array}
+   */
+  get stderr(){
+    return this._output.reduce((filtered, line) => {
+      if (line[0] === 2) filtered.push(line[1].replace(/\r?\n$/, ''))
+      return filtered
+    }, [])
+  }
+
 }
 Spawn._classInit()
 
